@@ -1,8 +1,8 @@
-// Bookmarklet Loader - This fetches and executes the latest release from GitHub
-// To use: Create a bookmark with this code (minified version below)
+// Bookmarklet Loader - Uses script tag injection to bypass CORS
+// This fetches and executes the latest release from GitHub
 (function() {
-  const REPO = 'radusuciu/amazon-synchrony-ynab-bookmarklet';
-  const RELEASE_URL = `https://github.com/${REPO}/releases/latest/download/bookmarklet.min.js`;
+  const REPO_OWNER = 'radusuciu';
+  const REPO_NAME = 'amazon-synchrony-ynab-bookmarklet';
   
   // Show loading indicator
   const loadingDiv = document.createElement('div');
@@ -21,20 +21,34 @@
   loadingDiv.textContent = 'Loading YNAB Sync Bookmarklet...';
   document.body.appendChild(loadingDiv);
   
-  // Fetch and execute the latest bookmarklet
-  fetch(RELEASE_URL)
-    .then(response => {
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+  // First, fetch the latest release info from GitHub API
+  fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/releases/latest`)
+    .then(response => response.json())
+    .then(data => {
+      // Find the bookmarklet.min.js asset
+      const asset = data.assets.find(a => a.name === 'bookmarklet.min.js');
+      if (!asset) {
+        throw new Error('Bookmarklet file not found in latest release');
       }
-      return response.text();
-    })
-    .then(script => {
-      // Remove loading indicator
-      document.body.removeChild(loadingDiv);
       
-      // Execute the bookmarklet
-      eval(script);
+      // Create script element with the download URL
+      const script = document.createElement('script');
+      script.src = asset.browser_download_url;
+      
+      script.onload = () => {
+        // Remove loading indicator and script tag
+        document.body.removeChild(loadingDiv);
+        document.head.removeChild(script);
+      };
+      
+      script.onerror = () => {
+        document.body.removeChild(loadingDiv);
+        document.head.removeChild(script);
+        alert('Failed to load bookmarklet script');
+      };
+      
+      // Append script to head to execute it
+      document.head.appendChild(script);
     })
     .catch(error => {
       // Remove loading indicator
@@ -49,4 +63,4 @@
 })();
 
 // Minified version for bookmark (copy this):
-// javascript:(function(){const e="radusuciu/amazon-synchrony-ynab-bookmarklet",t=`https://github.com/${e}/releases/latest/download/bookmarklet.min.js`,o=document.createElement("div");o.style.cssText="position:fixed;top:20px;right:20px;padding:10px 20px;background:#007bff;color:white;border-radius:4px;font-family:Arial,sans-serif;z-index:10000;box-shadow:0 2px 4px rgba(0,0,0,0.2)",o.textContent="Loading YNAB Sync Bookmarklet...",document.body.appendChild(o),fetch(t).then(e=>{if(!e.ok)throw new Error(`HTTP ${e.status}: ${e.statusText}`);return e.text()}).then(e=>{document.body.removeChild(o),eval(e)}).catch(e=>{document.body.contains(o)&&document.body.removeChild(o),alert(`Failed to load YNAB bookmarklet: ${e.message}\n\nMake sure you're on the Amazon Synchrony activity page.`),console.error("Bookmarklet loading error:",e)})})();
+// javascript:(function(){const e="radusuciu",t="amazon-synchrony-ynab-bookmarklet",o=document.createElement("div");o.style.cssText="position:fixed;top:20px;right:20px;padding:10px 20px;background:#007bff;color:white;border-radius:4px;font-family:Arial,sans-serif;z-index:10000;box-shadow:0 2px 4px rgba(0,0,0,0.2)",o.textContent="Loading YNAB Sync Bookmarklet...",document.body.appendChild(o),fetch(`https://api.github.com/repos/${e}/${t}/releases/latest`).then(e=>e.json()).then(e=>{const t=e.assets.find(e=>"bookmarklet.min.js"===e.name);if(!t)throw new Error("Bookmarklet file not found in latest release");const n=document.createElement("script");n.src=t.browser_download_url,n.onload=()=>{document.body.removeChild(o),document.head.removeChild(n)},n.onerror=()=>{document.body.removeChild(o),document.head.removeChild(n),alert("Failed to load bookmarklet script")},document.head.appendChild(n)}).catch(e=>{document.body.contains(o)&&document.body.removeChild(o),alert(`Failed to load YNAB bookmarklet: ${e.message}\n\nMake sure you're on the Amazon Synchrony activity page.`),console.error("Bookmarklet loading error:",e)})})();
