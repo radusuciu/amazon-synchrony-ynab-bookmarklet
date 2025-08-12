@@ -1,6 +1,6 @@
 {
   "name": "amazon-synchrony-ynab-bookmarklet",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Bookmarklet that helps you import transactions from the Amazon Synchrony Store Card activity page to a specific YNAB budget.",
   "main": "index.js",
   "scripts": {
