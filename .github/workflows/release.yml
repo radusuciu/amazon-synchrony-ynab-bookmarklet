@@ -1,0 +1,52 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+    
+    permissions:
+      contents: write
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Build bookmarklet
+        run: npm run build
+      
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: dist/bookmarklet.min.js
+          generate_release_notes: true
+          body: |
+            ## Installation
+            
+            Create a new bookmark in your browser with this code:
+            ```javascript
+            javascript:(function(){fetch('https://github.com/${{ github.repository }}/releases/latest/download/bookmarklet.min.js').then(r=>r.text()).then(eval).catch(e=>alert('Failed to load bookmarklet: '+e))})()
+            ```
+            
+            ## Usage
+            1. Navigate to your Amazon Synchrony Store Card activity page
+            2. Click the bookmark
+            3. Follow the prompts to sync with YNAB
+            
+            ## What's Changed
+            See below for full changelog.
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

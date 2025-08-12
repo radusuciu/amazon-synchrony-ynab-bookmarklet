@@ -10,20 +10,31 @@ A bookmarklet that syncs transactions from your Amazon Synchrony Store Card acti
 - **Flexible Date Matching**: Optional �1 day tolerance for matching transactions
 - **Interactive Review**: Preview all changes before applying them
 - **Selective Updates**: Choose which transactions to update or create
+- **Auto-updating**: Always uses the latest released version
 
-## Setup
+## Quick Start
 
-### Prerequisites
+### Option 1: Use Latest Release (Recommended)
+
+Create a bookmark in your browser with this code:
+
+```javascript
+javascript:(function(){fetch('https://github.com/radusuciu/amazon-synchrony-ynab-bookmarklet/releases/latest/download/bookmarklet.min.js').then(r=>r.text()).then(eval).catch(e=>alert('Failed to load bookmarklet: '+e))})()
+```
+
+### Option 2: Build from Source
+
+#### Prerequisites
 
 - Node.js and npm installed
 - YNAB account with API access
 - Amazon Synchrony Store Card account
 
-### Installation
+#### Installation
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/yourusername/amazon-synchrony-ynab-bookmarklet.git
+git clone https://github.com/radusuciu/amazon-synchrony-ynab-bookmarklet.git
 cd amazon-synchrony-ynab-bookmarklet
 ```
 
@@ -52,9 +63,10 @@ These settings are stored securely in your browser's localStorage.
 ## Usage
 
 1. Navigate to your Amazon Synchrony Store Card activity page
-2. Open your browser's developer console (F12)
-3. Copy and paste the contents of `dist/bookmarklet.min.js`
-4. Press Enter to run
+2. Click the bookmarklet in your bookmarks bar
+3. On first run, enter your YNAB credentials when prompted
+4. Review the proposed changes
+5. Click "Confirm" to sync transactions
 
 ### What Happens Next
 
@@ -75,6 +87,31 @@ These settings are stored securely in your browser's localStorage.
 - **Status Mapping**: "Posted" � cleared, others � uncleared
 
 ## Development
+
+### Creating a New Release
+
+This project uses semantic versioning. To create a new release:
+
+```bash
+# For a patch release (bug fixes): 0.1.0 -> 0.1.1
+npm version patch
+
+# For a minor release (new features): 0.1.0 -> 0.2.0
+npm version minor
+
+# For a major release (breaking changes): 0.1.0 -> 1.0.0
+npm version major
+
+# Push the commit and tag to GitHub
+git push && git push --tags
+```
+
+The GitHub Actions workflow will automatically:
+1. Build the bookmarklet
+2. Create a GitHub release
+3. Upload the minified JavaScript file
+
+Users with the bookmarklet will automatically get the latest version on next use.
 
 ### Build Commands
 
