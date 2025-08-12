@@ -7,10 +7,14 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "vite build",
     "build:tsc": "tsc",
+    "build:loader": "node scripts/update-loader.js",
+    "build:all": "npm run build && npm run build:loader",
+    "update-readme": "node scripts/update-loader.js --update-readme",
     "version:patch": "npm version patch",
     "version:minor": "npm version minor",
     "version:major": "npm version major",
-    "release": "npm run build && git push && git push --tags"
+    "preversion": "npm run build:all && npm run update-readme",
+    "release": "npm run build:all && git push && git push --tags"
   },
   "author": "",
   "license": "ISC",

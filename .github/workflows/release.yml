@@ -28,17 +28,30 @@ jobs:
       - name: Build bookmarklet
         run: npm run build
       
+      - name: Build loader bookmarklet
+        run: npm run build:loader
+      
+      - name: Get loader code for release
+        id: loader
+        run: |
+          LOADER_CODE=$(node scripts/get-loader-for-release.js)
+          echo "code<<EOF" >> $GITHUB_OUTPUT
+          echo "$LOADER_CODE" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+      
       - name: Create Release
         uses: softprops/action-gh-release@v1
         with:
-          files: dist/bookmarklet.min.js
+          files: |
+            dist/bookmarklet.min.js
+            dist/bookmarklet-loader.min.js
           generate_release_notes: true
           body: |
             ## Installation
             
             Create a new bookmark in your browser with this code:
             ```javascript
-            javascript:(function(){const e="${{ github.repository_owner }}",t="${{ github.event.repository.name }}",o=document.createElement("div");o.style.cssText="position:fixed;top:20px;right:20px;padding:10px 20px;background:#007bff;color:white;border-radius:4px;font-family:Arial,sans-serif;z-index:10000;box-shadow:0 2px 4px rgba(0,0,0,0.2)",o.textContent="Loading YNAB Sync Bookmarklet...",document.body.appendChild(o),fetch(`https://api.github.com/repos/${e}/${t}/releases/latest`).then(e=>e.json()).then(e=>{const t=e.assets.find(e=>"bookmarklet.min.js"===e.name);if(!t)throw new Error("Bookmarklet file not found in latest release");const n=document.createElement("script");n.src=t.browser_download_url,n.onload=()=>{document.body.removeChild(o),document.head.removeChild(n)},n.onerror=()=>{document.body.removeChild(o),document.head.removeChild(n),alert("Failed to load bookmarklet script")},document.head.appendChild(n)}).catch(e=>{document.body.contains(o)&&document.body.removeChild(o),alert(`Failed to load YNAB bookmarklet: ${e.message}\n\nMake sure you're on the Amazon Synchrony activity page.`),console.error("Bookmarklet loading error:",e)})})()
+            ${{ steps.loader.outputs.code }}
             ```
             
             ## Usage
